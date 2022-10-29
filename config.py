@@ -1,1 +1,1 @@
-API_KEY = 'insert_your_api key_ere'
+API_KEY = 'pk_553beeeb32644e7c9a974bb2e29d628f'
