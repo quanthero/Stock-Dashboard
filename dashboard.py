@@ -3,14 +3,16 @@ import streamlit as st
 import requests, redis
 from iex import IEXStock
 from datetime import datetime, timedelta
-
+import pandas as pd
+import plotly.express as px # interactive charts 
+import plotly.graph_objects as go
 
 symbol = st.sidebar.text_input("Symbol", value="AAPL") 
 
 stock = IEXStock(config.API_KEY, symbol)
-#client = redis.Redis(host="localhost", port=6379)
+client = redis.Redis(host="localhost", port=6379)
 
-screen = st.sidebar.selectbox("View", ('Overview', 'Fundamentals', 'News')) #, 'Ownership', 'Technicals'))
+screen = st.sidebar.selectbox("View", ('Overview', 'Fundamentals', 'News', 'Ownership', 'Historical Prices')) #, 'Ownership', 'Technicals'))
 st.title(screen) 
 
 if screen == "Overview" :
@@ -26,6 +28,10 @@ if screen == "Overview" :
     st.write(company_info['industry'])
     st.subheader('CEO')
     st.write(company_info['CEO'])
+    st.subheader('securityName')
+    st.write(company_info['securityName'])
+    st.subheader('employees')
+    st.write(company_info['employees'])
 
 if screen == "Fundamentals" :
     stats = stock.get_stats()
@@ -129,3 +135,40 @@ if screen == 'Ownership': # paid subscription needed for this
         st.write(transaction['fullName'])
         st.write(transaction['transactionShares'])
         st.write(transaction['transactionPrice'])
+
+if screen == 'Historical Prices':
+
+    st.subheader("HISTORICAL PRICES FOR 1 MONTH")
+    price = stock.get_HISTORICAL_PRICES_FOR_1_MONTH()
+    df = pd.DataFrame(price)
+    st.dataframe(df)
+
+    st.markdown("### First Chart")
+    fig = go.Figure(data=go.Ohlc(x=df['priceDate'],
+                open=df['open'],
+                high=df['high'],
+                low=df['low'],
+                close=df['close']))
+    fig.update(layout_xaxis_rangeslider_visible=False)
+    # fig = px.line(data_frame=df, y = 'close', x = 'priceDate')
+    st.write(fig)
+
+    st.markdown("### Second Chart")
+    fig2 = px.bar(df, x= df.priceDate, y="changePercent")
+    st.write(fig2)
+
+
+
+    # fig = go.Figure(data=go.Ohlc(x=df['priceDate'],
+    #             open=df['open'],
+    #             high=df['high'],
+    #             low=df['low'],
+    #             close=df['close']))
+    # fig.update(layout_xaxis_rangeslider_visible=False)
+#     for article in news:
+#         st.subheader(article['headline'])
+#         dt = datetime.utcfromtimestamp(article['datetime']/1000).isoformat()
+#         st.write(f"Posted by {article['source']} at {dt}")
+#         st.write(article['url'])
+#         st.write(article['summary'])
+#         st.image(article['image'])
