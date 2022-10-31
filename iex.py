@@ -3,7 +3,7 @@ import requests
 class IEXStock:
 
     def __init__(self, token, symbol):
-        self.BASE_URL = 'https://cloud.iexapis.com/stable'
+        self.BASE_URL = 'https://cloud.iexapis.com/v1'
 
         self.token = token
         self.symbol = symbol
@@ -26,7 +26,7 @@ class IEXStock:
 
         return r.json() 
 
-    def get_company_news(self, last=10):
+    def get_company_news(self, last=20):
         url = f"{self.BASE_URL}/stock/{self.symbol}/news/last/{last}?token={self.token}"
         r = requests.get(url)
 
@@ -43,3 +43,10 @@ class IEXStock:
         r = requests.get(url)
 
         return r.json()
+
+    def get_HISTORICAL_PRICES_FOR_1_MONTH(self):
+        url = f"{self.BASE_URL}/stock/{self.symbol}/chart/6m?token={self.token}"
+        r = requests.get(url)
+
+        return r.json()
+        
